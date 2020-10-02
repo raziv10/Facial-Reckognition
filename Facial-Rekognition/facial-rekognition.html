@@ -1,0 +1,189 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <link
+      rel="stylesheet"
+      href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css"
+      integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm"
+      crossorigin="anonymous"
+    />
+    <link
+      rel="stylesheet"
+      type="text/css"
+      href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/css/bootstrap.min.css"
+    />
+    <link rel="stylesheet" href="style.css" />
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.2.1/jquery.min.js"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.7/js/bootstrap.min.js"></script>
+    <script src="aws-cognito-sdk.min.js"></script>
+    <script src="amazon-cognito-identity.min.js"></script>
+    <script src="https://sdk.amazonaws.com/js/aws-sdk-2.16.0.min.js"></script>
+    <script src="script.js"></script>
+
+    <meta charset="UTF-8" />
+    <title>AWS Rekognition</title>
+    <style></style>
+  </head>
+
+  <body>
+    <nav class="navbar" style="background-color: 		mediumpurple">
+      <h3>AWS Assignment Week 4 - Rajiv Luitel</h3>
+    </nav>
+    <div class="note">
+      <h4>Facial Rekognition</h4>
+    </div>
+
+    <div class="container" style="margin-top: 3.8em">
+      <div class="row">
+        <img
+          style="margin-left: 30em"
+          class=""
+          src="https://encrypted-tbn0.gstatic.com/images?q=tbn%3AANd9GcQZD-m0nq46XWAkfLRLSfKxgNeG0v-F5m5GnA&usqp=CAU"
+          alt="Card image cap"
+          width="250px"
+          height="200px"
+        />
+        <div
+          style="margin-top: 2em"
+          class="col-xs-10 col-md-6 col-md-offset-2 col-sm-7 col-sm-offset-1"
+        >
+          <div class="input-group image-preview">
+            <span class="input-group-btn">
+              <div
+                class="btn btn-default image-preview-input"
+                style="margin-left: 200px"
+              >
+                <span class="glyphicon glyphicon-folder-open"></span>
+                <span class="image-preview-input-title">Browse</span>
+                <input
+                  type="file"
+                  name="fileToUpload"
+                  id="fileToUpload"
+                  accept="image/*"
+                />
+              </div>
+            </span>
+          </div>
+        </div>
+      </div>
+      <p id="opResult"></p>
+    </div>
+  </body>
+  <script>
+    document.getElementById("fileToUpload").addEventListener(
+      "change",
+      function(event) {
+        ProcessImage();
+      },
+      false
+    );
+
+    //Calls DetectFaces API and shows estimated ages of detected faces
+    function DetectFaces(imageData) {
+      AWS.config.region = "us-east-1";
+      var rekognition = new AWS.Rekognition();
+      var params = {
+        Image: {
+          Bytes: imageData
+        },
+        Attributes: ["ALL"]
+      };
+      rekognition.detectFaces(params, function(err, data) {
+        if (err) console.log(err, err.stack);
+        // an error occurred
+        else {
+          var table = "<table><tr><th>Low</th><th>High</th></tr>";
+          // show each face and build out estimated age table
+          for (var i = 0; i < data.FaceDetails.length; i++) {
+            table +=
+              "<tr><td>" +
+              data.FaceDetails[i].AgeRange.Low +
+              "</td><td>" +
+              data.FaceDetails[i].AgeRange.High +
+              "</td></tr>";
+          }
+          table += "</table>";
+          document.getElementById("opResult").innerHTML = table;
+          table.setAttribute("class", "table table-dark");
+        }
+      });
+    }
+    //Loads selected image and unencodes image bytes for Rekognition DetectFaces API
+    function ProcessImage() {
+      AnonLog();
+      var control = document.getElementById("fileToUpload");
+      var file = control.files[0];
+
+      // Load base64 encoded image for display
+      var reader = new FileReader();
+      reader.onload = (function(theFile) {
+        return function(e) {
+          //Call Rekognition
+          AWS.region = "us-east-1";
+          var rekognition = new AWS.Rekognition();
+          var params = {
+            Image: {
+              Bytes: e.target.result
+            },
+            Attributes: ["ALL"]
+          };
+          rekognition.detectFaces(params, function(err, data) {
+            if (err) console.log(err, err.stack);
+            // an error occurred
+            else {
+              var table = "<table><tr><th>Attribute</th><th>Value</th></tr>";
+              // show each face and build out estimated age table
+              for (var i = 0; i < data.FaceDetails.length; i++) {
+                table +=
+                  "<tr><td>" +
+                  "Gender" +
+                  "</td><td>" +
+                  data.FaceDetails[i].Gender.Value +
+                  "</td></tr>" +
+                  "<tr><td>" +
+                  "Age" +
+                  "</td><td>" +
+                  data.FaceDetails[i].AgeRange.Low +
+                  " years" +
+                  " to " +
+                  data.FaceDetails[i].AgeRange.High +
+                  " years" +
+                  "</td></tr>" +
+                  "<tr><td>" +
+                  "Emotion" +
+                  "</td><td>" +
+                  data.FaceDetails[i].Emotions[0].Type +
+                  "</td></tr>" +
+                  "<tr><td>" +
+                  "Sunglasses" +
+                  "</td><td>" +
+                  data.FaceDetails[i].Sunglasses.Value +
+                  "</td></tr>";
+              }
+              table += "</table>";
+              document.getElementById("opResult").innerHTML = table;
+            }
+          });
+        };
+      })(file);
+      reader.readAsArrayBuffer(file);
+    }
+
+    //Provides anonymous log on to AWS services
+    function AnonLog() {
+      // Configure the credentials provider to use your identity pool
+      AWS.config.region = "us-east-1"; // Region
+      AWS.config.credentials = new AWS.CognitoIdentityCredentials({
+        IdentityPoolId: "us-east-1:5c6013af-9d24-4e94-b528-d6193f85e61d"
+      });
+      // Make the call to obtain credentials
+      AWS.config.credentials.get(function() {
+        // Credentials will be available when this function is called.
+        var accessKeyId = "ASIASWFNJ2FOUZJEQEUL";
+        var secretAccessKey = "6UCYkxU2ovn9QqI1SgVkuBV8vxNosONQdZzowpyM";
+        var sessionToken =
+          "FwoGZXIvYXdzEEUaDNPzD6DzYFwR7bdKqiLXAaog22qxmdqJMQzNnlIBiB4cNibHLyCZIv3tLtcI0bB5zKcOQZAgRHJiB4o0CPlCF3CQWJ2Oc/gJBw5LbgHikpJBhu8aNbRNB4zVQswP0hWa7nTct07Ydo0DatAV4HlZCbVVYV6imp/PFie47TE7fDM/h+3kQ8xyz9lpvk6gBNl7D4xL9J5G1rqRXCcU3BUPVntId+TgLBNOVYejXBGKQOCKvxqw4C9/5uh3UqMJLzOiyKYc2bfuY0Hl9C7RRuwWVquMWu7GD5sQ+B7y41h61TtRoiPgx8P4KKHU0fsFMi3aM60+bU2X6t4RaXkl1igSeXHlk5y83LwRhHrZUsy2HEvpzSnmpYTTA3cTpR8=";
+      });
+    }
+  </script>
+</html>

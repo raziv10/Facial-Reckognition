@@ -1,0 +1,82 @@
+.popover {
+  margin-left: 5.8em;
+}
+h3 {
+  color: azure;
+}
+h1 {
+  text-align: center;
+}
+.note {
+  position: absolute;
+  display: flex;
+  justify-content: center;
+  margin-left: 35em;
+  margin-top: -1em;
+  width: 25%;
+  padding: 0.1em 0.8em;
+  margin-bottom: 0.5em;
+  color: #fff;
+  background: cadetblue;
+  overflow: hidden;
+}
+
+.note:before {
+  content: "";
+  position: absolute;
+  top: 0;
+  right: 0;
+  border-width: 0 16px 16px 0;
+  border-style: solid;
+  border-color: #fff #fff black black;
+  background: cadetblue;
+  -webkit-box-shadow: 0 1px 1px rgba(0, 0, 0, 0.3),
+    -1px 1px 1px rgba(0, 0, 0, 0.2);
+  -moz-box-shadow: 0 1px 1px rgba(0, 0, 0, 0.3), -1px 1px 1px rgba(0, 0, 0, 0.2);
+  box-shadow: 0 1px 1px rgba(0, 0, 0, 0.3), -1px 1px 1px rgba(0, 0, 0, 0.2);
+  /* Firefox 3.0 damage limitation */
+  display: block;
+  width: 0;
+}
+
+.note.rounded {
+  -moz-border-radius: 5px 0 5px 5px;
+  border-radius: 5px 0 5px 5px;
+}
+
+.note.rounded:before {
+  border-width: 8px;
+  border-color: #fff #fff transparent transparent;
+  -moz-border-radius: 0 0 0 5px;
+  border-radius: 0 0 0 5px;
+}
+
+table {
+  font-family: "Trebuchet MS", Arial, Helvetica, sans-serif;
+  border-collapse: collapse;
+  margin-top: 1em;
+  margin-left: 20em;
+  width: 50%;
+}
+
+table td,
+table th {
+  border: 1px solid #ddd;
+  padding: 8px;
+}
+
+table tr:nth-child(even) {
+  background-color: #f2f2f2;
+}
+
+table tr:hover {
+  background-color: #ddd;
+}
+
+table th {
+  padding-top: 12px;
+  padding-bottom: 12px;
+  text-align: left;
+  background-color: cadetblue;
+  color: white;
+}
